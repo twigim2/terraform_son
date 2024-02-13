@@ -11,7 +11,7 @@ resource "aws_instance" "example" {
     user_data = <<-EOF
                     #!/bin/bash
                     echo "Hello, World" > index.html
-                    nohup busybox httpd -f -p 8080 &
+                    nohup busybox httpd -f -p ${var.web_port} &
                     EOF
 
     tags = {
@@ -23,8 +23,8 @@ resource "aws_security_group" "web" {
     name = "aws14-example-instance-web"
 
     ingress {
-        from_port = 8080
-        to_port = 8080
+        from_port = var.web_port
+        to_port = var.web_port
         protocol = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
     }
@@ -34,8 +34,8 @@ resource "aws_security_group" "ssh" {
     name = "aws14-example-instance-ssh"
 
     ingress {
-        from_port = 22
-        to_port = 22
+        from_port = var.ssh_port
+        to_port = var.ssh_port
         protocol = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
     }
@@ -44,4 +44,16 @@ resource "aws_security_group" "ssh" {
 output "public_ip" {
     value = aws_instance.example.public_ip
     description = "The public IP of the Instance"
+}
+
+variable "web_port" {
+    type = number
+    description = "The port will use for HTTP requests"
+    default = 8080
+}
+
+variable "ssh_port" {
+    type = number
+    description = "The port will use for SSH requests"
+    default = 22
 }
